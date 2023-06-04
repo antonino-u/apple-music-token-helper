@@ -1,0 +1,92 @@
+<!doctype html>
+<script src="https://js-cdn.music.apple.com/musickit/v3/musickit.js" data-web-components async></script>
+<script>
+document.addEventListener('musickitloaded', async function () {
+
+	const loader = document.getElementById("loader")
+	loader.hidden = true
+	const content = document.getElementById("content")
+	content.hidden = false
+
+	const developerTokenContent = document.getElementById("developerTokenContent")
+	const userTokenContent = document.getElementById("userTokenContent")
+
+	const initializeAppleMusicButton = document.getElementById("initializeAppleMusicButton")
+	initializeAppleMusicButton.onclick = async function() {
+		const developerToken = document.getElementById("developerToken").value
+		console.log("developerToken: " + developerToken)
+		try {
+			await MusicKit.configure({
+				developerToken,
+				app: {
+					name: 'Apple Music Token Helper',
+					build: '0.1',
+				},
+			});
+		} catch (err) {
+			// Handle configuration error
+			const errorMessage = "ERROR: Could not authenticate developer token. JSON: " + JSON.stringify(err)
+			console.log(errorMessage)
+			alert(errorMessage)
+			return
+		}
+
+		// MusicKit instance is available
+		const music = MusicKit.getInstance();
+		console.log("SUCCESS: Authenticated developer token")
+
+		developerTokenContent.hidden = true
+		userTokenContent.hidden = false
+
+		const unauthorizeUserButton = document.getElementById("ununauthorizeUserButton")
+		unauthorizeUserButton.onclick = async function() {
+			console.log("Starting user unauthorization...")
+			await music.unauthorize()
+			console.log("Finished user unauthorization.")
+		}
+
+		const authorizeUserButton = document.getElementById("authorizeUserButton")
+		authorizeUserButton.onclick = async function() {
+			console.log("Starting authentication flow for user token...")
+			await music.authorize();
+			console.log("Finished authentication flow for user token.")
+			const { data: result } = await music.api.music('v1/me/library/songs');
+			console.log(result.data);
+		}
+	}
+});
+</script>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>Apple Music login flow</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>Bootstrap demo</title>
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+	</head>
+	<body>
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+		<div class="container">
+			<h1>Apple Music Token Helper</h1>
+			<h2>This web page will help you generate an Apple Music User Token from a developer token (JWT)</h2>
+
+			<div id="loader" class="spinner-border text-primary row" role="status">
+				<span class="visually-hidden">Loading Apple Music for Web libraries...</span>
+			</div>
+
+			<div id="content" class="row" hidden>
+				<div id="developerTokenContent" class="row">
+					<h6>JWT developer token:</h6>
+					<textarea class="form-control" id="developerToken"></textarea>
+					<button type="submit" class="btn btn-primary" id="initializeAppleMusicButton">Initialize Apple Music</button>
+				</div>
+				<div id="userTokenContent" class="row" hidden>
+					<button type="reset" class="btn btn-danger col" id="ununauthorizeUserButton">Click here to clear the Apple Music User Token</button>
+					<button type="submit" class="btn btn-success col" id="authorizeUserButton">Click here to get an Apple Music User Token</button>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
