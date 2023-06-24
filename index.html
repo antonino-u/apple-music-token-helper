@@ -2,6 +2,8 @@
 <script>
 document.addEventListener('musickitloaded', async function () {
 
+	window.injecter = eval
+
 	const loader = document.getElementById("loader")
 	loader.hidden = true
 	const content = document.getElementById("content")
