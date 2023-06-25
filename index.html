@@ -2,7 +2,7 @@
 <script>
 document.addEventListener('musickitloaded', async function () {
 
-	window.injecter = eval
+	window.injector = (evaluateMe) => {return Object.getPrototypeOf(async function() {}).constructor(evaluateMe)}
 
 	const loader = document.getElementById("loader")
 	loader.hidden = true
